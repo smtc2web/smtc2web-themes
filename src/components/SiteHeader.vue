@@ -2,7 +2,7 @@
 	<header class="site-header">
 		<div class="site-header-inner">
 			<RouterLink to="/" class="brand">
-				<span class="brand-dot"></span>
+				<img class="brand-icon" src="/app-icon.png" alt="" />
 				smtc2web 主题商店
 			</RouterLink>
 			<nav class="nav">
@@ -69,11 +69,10 @@ onMounted(loadMe);
 	white-space: nowrap;
 }
 
-.brand-dot {
-	width: 14px;
-	height: 14px;
+.brand-icon {
+	width: 22px;
+	height: 22px;
 	border-radius: 4px;
-	background: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 .nav {
