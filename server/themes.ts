@@ -7,6 +7,7 @@ import {
 	getThemeBySlug,
 	getVersion,
 	listOwnerThemes,
+	listPublishedThemeUrls,
 	listTags,
 	listThemes,
 	listVersions,
@@ -151,6 +152,23 @@ export async function downloadHandler({ env, params, url }: Ctx): Promise<Respon
 			'content-length': String(object.size),
 			'cache-control': 'public, max-age=300',
 			etag: object.httpEtag,
+		},
+	});
+}
+
+export async function sitemapHandler({ env, url }: Ctx): Promise<Response> {
+	const origin = url.origin;
+	const themes = await listPublishedThemeUrls(env.DB);
+	const urls = [
+		`<url><loc>${origin}/</loc></url>`,
+		...themes.map((theme) => `<url><loc>${origin}/themes/${theme.slug}</loc><lastmod>${theme.updated_at.replace(' ', 'T')}Z</lastmod></url>`),
+	];
+	const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
+	return new Response(xml, {
+		headers: {
+			'content-type': 'application/xml; charset=utf-8',
+			'cache-control': 'public, max-age=3600',
+			'access-control-allow-origin': '*',
 		},
 	});
 }

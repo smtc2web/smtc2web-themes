@@ -12,6 +12,7 @@ import {
 	meHandler,
 	myThemesHandler,
 	patchThemeHandler,
+	sitemapHandler,
 	type Ctx,
 } from './themes';
 
@@ -28,6 +29,7 @@ const routes: Route[] = [
 	{ method: 'GET', pattern: new URLPattern({ pathname: '/api/themes/:slug/screenshot' }), handler: getScreenshotHandler, public: true },
 	{ method: 'GET', pattern: new URLPattern({ pathname: '/api/themes/:slug/download' }), handler: downloadHandler, public: true },
 	{ method: 'GET', pattern: new URLPattern({ pathname: '/api/tags' }), handler: listTagsHandler, public: true },
+	{ method: 'GET', pattern: new URLPattern({ pathname: '/sitemap.xml' }), handler: sitemapHandler, public: true },
 	{ method: 'GET', pattern: new URLPattern({ pathname: '/api/me' }), handler: meHandler },
 	{ method: 'GET', pattern: new URLPattern({ pathname: '/api/me/themes' }), handler: myThemesHandler },
 	{ method: 'POST', pattern: new URLPattern({ pathname: '/api/themes' }), handler: createThemeHandler },
@@ -55,7 +57,7 @@ export default {
 			});
 		}
 
-		if (!url.pathname.startsWith('/api/')) return new Response('Not Found', { status: 404 });
+		if (!url.pathname.startsWith('/api/') && url.pathname !== '/sitemap.xml') return new Response('Not Found', { status: 404 });
 
 		try {
 			for (const route of routes) {
