@@ -5,4 +5,5 @@
     "types": [ "./worker-configuration.d.ts","vite/client"],
   },
   "include": ["server"],
+  "exclude": ["server/**/*.test.ts"]
 }
