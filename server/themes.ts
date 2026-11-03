@@ -6,6 +6,7 @@ import {
 	getLatestVersion,
 	getThemeBySlug,
 	getVersion,
+	listAllThemes,
 	listOwnerThemes,
 	listPublishedThemeUrls,
 	listTags,
@@ -173,9 +174,10 @@ export async function sitemapHandler({ env, url }: Ctx): Promise<Response> {
 	});
 }
 
-export async function myThemesHandler({ request, env }: Ctx): Promise<Response> {
+export async function myThemesHandler({ request, env, url }: Ctx): Promise<Response> {
 	const user = await requireUser(request, env);
-	const themes = await listOwnerThemes(env.DB, user.id);
+	const all = url.searchParams.get('all') === 'true' && isAdmin(env, user);
+	const themes = all ? await listAllThemes(env.DB) : await listOwnerThemes(env.DB, user.id);
 	return json({ themes: themes.map((theme) => serializeTheme(theme, request, true)) });
 }
 

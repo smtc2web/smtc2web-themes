@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: 'My Themes',
+		scopeMine: 'My Themes',
+		scopeAll: 'All Themes',
 		publishNew: 'Publish New Theme',
 		loginRequired: 'Please sign in with GitHub to manage your themes.',
 		loginAction: 'Sign in with GitHub',
 		empty: "You haven't published any themes yet.",
+		emptyAll: 'No themes yet.',
 		publishFirst: 'Publish your first theme',
 		published: 'Published',
 		hidden: 'Unlisted',

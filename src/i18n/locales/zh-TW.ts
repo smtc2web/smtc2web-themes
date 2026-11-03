@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: '我的主題',
+		scopeMine: '我的主題',
+		scopeAll: '所有主題',
 		publishNew: '發佈新主題',
 		loginRequired: '請先使用 GitHub 登入後管理你的主題。',
 		loginAction: '使用 GitHub 登入',
 		empty: '你還沒有發佈過主題。',
+		emptyAll: '暫無主題。',
 		publishFirst: '發佈第一個主題',
 		published: '已發佈',
 		hidden: '已下架',

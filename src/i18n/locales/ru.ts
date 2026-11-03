@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: 'Мои темы',
+		scopeMine: 'Мои темы',
+		scopeAll: 'Все темы',
 		publishNew: 'Опубликовать новую тему',
 		loginRequired: 'Войдите через GitHub для управления темами.',
 		loginAction: 'Войти через GitHub',
 		empty: 'У вас пока нет опубликованных тем.',
+		emptyAll: 'Тем пока нет.',
 		publishFirst: 'Опубликуйте первую тему',
 		published: 'Опубликовано',
 		hidden: 'Скрыто',

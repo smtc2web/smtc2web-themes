@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: '我的主题',
+		scopeMine: '我的主题',
+		scopeAll: '所有主题',
 		publishNew: '发布新主题',
 		loginRequired: '请先使用 GitHub 登录后管理你的主题。',
 		loginAction: '使用 GitHub 登录',
 		empty: '你还没有发布过主题。',
+		emptyAll: '暂无主题。',
 		publishFirst: '发布第一个主题',
 		published: '已发布',
 		hidden: '已下架',

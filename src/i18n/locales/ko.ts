@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: '내 테마',
+		scopeMine: '내 테마',
+		scopeAll: '전체 테마',
 		publishNew: '새 테마 게시',
 		loginRequired: '테마를 관리하려면 GitHub로 로그인해 주세요.',
 		loginAction: 'GitHub로 로그인',
 		empty: '아직 게시한 테마가 없습니다.',
+		emptyAll: '테마가 없습니다.',
 		publishFirst: '첫 번째 테마 게시하기',
 		published: '게시됨',
 		hidden: '숨김',

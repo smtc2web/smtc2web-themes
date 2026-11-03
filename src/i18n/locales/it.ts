@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: 'I miei temi',
+		scopeMine: 'I miei temi',
+		scopeAll: 'Tutti i temi',
 		publishNew: 'Pubblica nuovo tema',
 		loginRequired: 'Accedi con GitHub per gestire i tuoi temi.',
 		loginAction: 'Accedi con GitHub',
 		empty: 'Non hai ancora pubblicato nessun tema.',
+		emptyAll: 'Nessun tema disponibile.',
 		publishFirst: 'Pubblica il tuo primo tema',
 		published: 'Pubblicato',
 		hidden: 'Nascosto',

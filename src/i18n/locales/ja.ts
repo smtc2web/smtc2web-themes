@@ -42,10 +42,13 @@ export default {
 	},
 	dashboard: {
 		title: 'マイテーマ',
+		scopeMine: 'マイテーマ',
+		scopeAll: 'すべてのテーマ',
 		publishNew: '新しいテーマを公開',
 		loginRequired: 'テーマを管理するには GitHub でログインしてください。',
 		loginAction: 'GitHub でログイン',
 		empty: 'まだテーマを公開していません。',
+		emptyAll: 'テーマがありません。',
 		publishFirst: '最初のテーマを公開',
 		published: '公開中',
 		hidden: '非公開',
