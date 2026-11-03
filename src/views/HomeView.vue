@@ -1,17 +1,17 @@
 <template>
 	<section class="hero">
-		<h1>为你的直播挑选一款主题</h1>
-		<p>浏览社区制作的 smtc2web 主题，一键下载后在应用内导入。登录 GitHub 即可发布你自己的主题。</p>
+		<h1>{{ t('home.heroTitle') }}</h1>
+		<p>{{ t('home.heroDescription') }}</p>
 		<p v-if="authErrorMessage" class="error-banner">{{ authErrorMessage }}</p>
 		<form class="search" @submit.prevent="applySearch">
-			<input v-model="searchInput" type="search" placeholder="搜索主题名称、描述或作者" />
-			<button class="btn" type="submit">搜索</button>
+			<input v-model="searchInput" type="search" :placeholder="t('home.searchPlaceholder')" />
+			<button class="btn" type="submit">{{ t('common.search') }}</button>
 		</form>
 	</section>
 
 	<section class="toolbar">
 		<div class="tag-list">
-			<button type="button" class="chip" :class="{ active: !tag }" @click="setTag('')">全部</button>
+			<button type="button" class="chip" :class="{ active: !tag }" @click="setTag('')">{{ t('home.all') }}</button>
 			<button
 				v-for="item in tags"
 				:key="item.tag"
@@ -24,9 +24,9 @@
 			</button>
 		</div>
 		<select v-model="sort" class="select">
-			<option value="newest">最近更新</option>
-			<option value="popular">下载最多</option>
-			<option value="name">名称排序</option>
+			<option value="newest">{{ t('home.sortNewest') }}</option>
+			<option value="popular">{{ t('home.sortPopular') }}</option>
+			<option value="name">{{ t('home.sortName') }}</option>
 		</select>
 	</section>
 
@@ -36,16 +36,16 @@
 	</div>
 	<template v-else-if="data">
 		<div v-if="!data.themes.length" class="empty">
-			<p>没有找到符合条件的主题。</p>
-			<RouterLink class="btn" to="/submit">发布第一个主题</RouterLink>
+			<p>{{ t('home.noResults') }}</p>
+			<RouterLink class="btn" to="/submit">{{ t('home.publishFirst') }}</RouterLink>
 		</div>
 		<div v-else class="grid">
 			<ThemeCard v-for="theme in data.themes" :key="theme.slug" :theme="theme" />
 		</div>
 		<div v-if="data.total_pages > 1" class="pager">
-			<button class="btn btn-ghost" type="button" :disabled="page <= 1" @click="setPage(page - 1)">上一页</button>
-			<span>第 {{ data.page }} / {{ data.total_pages }} 页（共 {{ data.total }} 个主题）</span>
-			<button class="btn btn-ghost" type="button" :disabled="page >= data.total_pages" @click="setPage(page + 1)">下一页</button>
+			<button class="btn btn-ghost" type="button" :disabled="page <= 1" @click="setPage(page - 1)">{{ t('home.prevPage') }}</button>
+			<span>{{ t('home.pageInfo', { page: data.page, totalPages: data.total_pages, total: data.total }) }}</span>
+			<button class="btn btn-ghost" type="button" :disabled="page >= data.total_pages" @click="setPage(page + 1)">{{ t('home.nextPage') }}</button>
 		</div>
 	</template>
 </template>
@@ -53,24 +53,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { api, type ThemeList } from '@/api';
 import ThemeCard from '@/components/ThemeCard.vue';
 
-const AUTH_ERROR_MESSAGES: Record<string, string> = {
-	state: '登录会话已过期或被中断，请重试。',
-	token: 'GitHub 授权码交换失败，请重试。',
-	user: '无法读取 GitHub 账号信息，请重试。',
-	config: '服务器未配置 GitHub OAuth，暂时无法登录。',
-	denied: '你取消了 GitHub 授权。',
-};
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
 
 const authErrorMessage = computed(() => {
 	const code = typeof route.query.auth_error === 'string' ? route.query.auth_error : '';
-	return code ? (AUTH_ERROR_MESSAGES[code] ?? '登录失败，请重试。') : '';
+	if (!code) return '';
+	const key = code as keyof typeof AUTH_ERROR_KEYS;
+	const messageKey = AUTH_ERROR_KEYS[key];
+	return messageKey ? t(messageKey) : t('authError.fallback');
 });
+
+const AUTH_ERROR_KEYS: Record<string, string> = {
+	state: 'authError.state',
+	token: 'authError.token',
+	user: 'authError.user',
+	config: 'authError.config',
+	denied: 'authError.denied',
+};
 
 const searchInput = ref(typeof route.query.q === 'string' ? route.query.q : '');
 const q = ref(searchInput.value);
@@ -89,7 +95,7 @@ async function load(): Promise<void> {
 	try {
 		data.value = await api.listThemes({ q: q.value, tag: tag.value, sort: sort.value, page: page.value });
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '加载失败';
+		errorMsg.value = error instanceof Error ? error.message : t('dashboard.loadFailed');
 	} finally {
 		loading.value = false;
 	}
@@ -125,7 +131,7 @@ onMounted(async () => {
 	try {
 		tags.value = (await api.listTags()).tags;
 	} catch {
-		/* 标签加载失败不影响目录 */
+		/* tag loading failure doesn't affect catalog */
 	}
 });
 </script>

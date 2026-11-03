@@ -4,7 +4,7 @@
 		<RouterView />
 	</main>
 	<footer class="site-footer">
-		<span>smtc2web 主题商店 · </span>
+		<span>{{ t('footer.tagline') }} · </span>
 		<a href="https://smtc2web.org" target="_blank" rel="noopener">smtc2web.org</a>
 		<span> · </span>
 		<a href="https://github.com/smtc2web" target="_blank" rel="noopener">GitHub</a>
@@ -12,6 +12,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { RouterView } from 'vue-router';
 import SiteHeader from '@/components/SiteHeader.vue';
+import { useLocale } from '@/composables/useLocale';
+
+const { t } = useI18n();
+useLocale();
 </script>

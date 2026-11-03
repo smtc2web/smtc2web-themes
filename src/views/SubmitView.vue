@@ -1,37 +1,34 @@
 <template>
-	<div v-if="!loaded" class="loading">加载中…</div>
+	<div v-if="!loaded" class="loading">{{ t('common.loading') }}</div>
 	<div v-else-if="!me" class="empty">
-		<p>请先使用 GitHub 登录后发布主题。</p>
-		<button class="btn" type="button" @click="login">使用 GitHub 登录</button>
+		<p>{{ t('submit.loginRequired') }}</p>
+		<button class="btn" type="button" @click="login">{{ t('submit.loginAction') }}</button>
 	</div>
 	<template v-else>
-		<RouterLink to="/dashboard" class="back">← 返回我的主题</RouterLink>
-		<h1>{{ slug ? `为 ${slug} 发布新版本` : '发布主题' }}</h1>
+		<RouterLink to="/dashboard" class="back">{{ t('submit.backToDashboard') }}</RouterLink>
+		<h1>{{ slug ? t('submit.newVersionTitle', { slug }) : t('submit.title') }}</h1>
 		<p class="intro">
-			选择一个符合 smtc2web 主题规范（根文件夹内包含 <code>theme.toml</code> 且带 <code>[smtc2web.theme]</code> 配置节）的 ZIP 文件。
-			主题名称、版本、描述、标签和截图会从 <code>theme.toml</code> 自动读取。
+			{{ t('submit.intro') }}
 		</p>
 
 		<form class="upload-form" @submit.prevent="submit">
 			<label class="file-picker">
 				<input type="file" accept=".zip,application/zip" @change="onFileChange" />
 				<span v-if="file">{{ file.name }}（{{ formatSize(file.size) }}）</span>
-				<span v-else>点击选择主题 ZIP 文件</span>
+				<span v-else>{{ t('submit.selectFile') }}</span>
 			</label>
 			<label v-if="!slug" class="field">
-				<span>主题标识 slug（可选）</span>
-				<input v-model="slugInput" placeholder="例如 my-theme，仅小写字母、数字和连字符" />
+				<span>{{ t('submit.slugLabel') }}</span>
+				<input v-model="slugInput" :placeholder="t('submit.slugPlaceholder')" />
 			</label>
 			<button class="btn btn-lg" type="submit" :disabled="!file || busy">
-				{{ busy ? '上传中…' : '上传并发布' }}
+				{{ busy ? t('submit.uploading') : t('submit.uploadAndPublish') }}
 			</button>
 		</form>
 
 		<p v-if="errorMsg" class="error-banner">{{ errorMsg }}</p>
 		<p class="hint">
-			推荐使用自动发布：在主题仓库中接入
-			<a href="https://github.com/smtc2web/theme-upload" target="_blank" rel="noopener">smtc2web/theme-upload</a>
-			工作流后，推送 <code>v*</code> tag 即可自动更新商店。
+			{{ t('submit.hint') }}
 		</p>
 	</template>
 </template>
@@ -39,9 +36,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
 import { useAuth } from '@/composables/useAuth';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { me, loaded, loadMe, login } = useAuth();
@@ -64,7 +63,7 @@ function formatSize(bytes: number): string {
 async function submit(): Promise<void> {
 	if (!file.value) return;
 	if (file.value.size > 20 * 1024 * 1024) {
-		errorMsg.value = '主题包大小不能超过 20MB';
+		errorMsg.value = t('submit.sizeLimit');
 		return;
 	}
 	busy.value = true;
@@ -73,7 +72,7 @@ async function submit(): Promise<void> {
 		const result = await api.publishTheme(file.value, slug || slugInput.value.trim() || undefined);
 		await router.push(`/themes/${result.slug}`);
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '上传失败';
+		errorMsg.value = error instanceof Error ? error.message : t('submit.uploadFailed');
 	} finally {
 		busy.value = false;
 	}

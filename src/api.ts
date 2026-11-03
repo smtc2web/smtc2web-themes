@@ -73,7 +73,7 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	const response = await fetch(path, init);
 	const data = (await response.json().catch(() => null)) as { error?: string } | null;
-	if (!response.ok) throw new ApiError(response.status, data?.error ?? `请求失败（${response.status}）`);
+	if (!response.ok) throw new ApiError(response.status, data?.error ?? `Request failed (${response.status})`);
 	return data as T;
 }
 

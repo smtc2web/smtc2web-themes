@@ -19,6 +19,7 @@
 		"fflate": "^0.8.3",
 		"smol-toml": "^1.8.0",
 		"vue": "^3.5.40",
+		"vue-i18n": "^11.4.17",
 		"vue-router": "^5.2.0"
 	},
 	"devDependencies": {

@@ -1,20 +1,20 @@
 <template>
-	<div v-if="!loaded" class="loading">加载中…</div>
+	<div v-if="!loaded" class="loading">{{ t('common.loading') }}</div>
 	<div v-else-if="!me" class="empty">
-		<p>请先使用 GitHub 登录后管理你的主题。</p>
-		<button class="btn" type="button" @click="login">使用 GitHub 登录</button>
+		<p>{{ t('dashboard.loginRequired') }}</p>
+		<button class="btn" type="button" @click="login">{{ t('dashboard.loginAction') }}</button>
 	</div>
 	<template v-else>
 		<header class="page-header">
-			<h1>我的主题</h1>
-			<RouterLink class="btn" to="/submit">发布新主题</RouterLink>
+			<h1>{{ t('dashboard.title') }}</h1>
+			<RouterLink class="btn" to="/submit">{{ t('dashboard.publishNew') }}</RouterLink>
 		</header>
 
 		<p v-if="errorMsg" class="error-banner">{{ errorMsg }}</p>
-		<div v-if="loading" class="loading">加载中…</div>
+		<div v-if="loading" class="loading">{{ t('common.loading') }}</div>
 		<div v-else-if="!themes.length" class="empty">
-			<p>你还没有发布过主题。</p>
-			<RouterLink class="btn" to="/submit">发布第一个主题</RouterLink>
+			<p>{{ t('dashboard.empty') }}</p>
+			<RouterLink class="btn" to="/submit">{{ t('dashboard.publishFirst') }}</RouterLink>
 		</div>
 		<div v-else class="theme-list">
 			<article v-for="theme in themes" :key="theme.slug" class="theme-row">
@@ -22,17 +22,17 @@
 					<RouterLink :to="`/themes/${theme.slug}`" class="name">{{ theme.name }}</RouterLink>
 					<div class="sub">
 						<span>v{{ theme.version }}</span>
-						<span>{{ theme.downloads }} 次下载</span>
-						<span>{{ theme.version_count }} 个版本</span>
-						<span class="badge" :class="theme.status">{{ theme.status === 'published' ? '已发布' : '已下架' }}</span>
+						<span>{{ t('common.downloadCount', { count: theme.downloads }) }}</span>
+						<span>{{ t('common.versionCount', { count: theme.version_count }) }}</span>
+						<span class="badge" :class="theme.status">{{ theme.status === 'published' ? t('dashboard.published') : t('dashboard.hidden') }}</span>
 					</div>
 				</div>
 				<div class="row-actions">
-					<RouterLink class="btn btn-ghost" :to="`/submit/${theme.slug}`">发布新版本</RouterLink>
+					<RouterLink class="btn btn-ghost" :to="`/submit/${theme.slug}`">{{ t('dashboard.publishNewVersion') }}</RouterLink>
 					<button class="btn btn-ghost" type="button" :disabled="busy === theme.slug" @click="toggleStatus(theme)">
-						{{ theme.status === 'published' ? '下架' : '恢复' }}
+						{{ theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
 					</button>
-					<button class="btn btn-danger" type="button" :disabled="busy === theme.slug" @click="remove(theme)">删除</button>
+					<button class="btn btn-danger" type="button" :disabled="busy === theme.slug" @click="remove(theme)">{{ t('dashboard.delete') }}</button>
 				</div>
 			</article>
 		</div>
@@ -42,9 +42,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { api, type ThemeSummary } from '@/api';
 import { useAuth } from '@/composables/useAuth';
 
+const { t } = useI18n();
 const { me, loaded, loadMe, login } = useAuth();
 
 const themes = ref<ThemeSummary[]>([]);
@@ -58,7 +60,7 @@ async function loadThemes(): Promise<void> {
 	try {
 		themes.value = (await api.myThemes()).themes;
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '加载失败';
+		errorMsg.value = error instanceof Error ? error.message : t('dashboard.loadFailed');
 	} finally {
 		loading.value = false;
 	}
@@ -71,21 +73,21 @@ async function toggleStatus(theme: ThemeSummary): Promise<void> {
 		await api.setStatus(theme.slug, theme.status === 'published' ? 'hidden' : 'published');
 		await loadThemes();
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '操作失败';
+		errorMsg.value = error instanceof Error ? error.message : t('dashboard.operationFailed');
 	} finally {
 		busy.value = '';
 	}
 }
 
 async function remove(theme: ThemeSummary): Promise<void> {
-	if (!window.confirm(`确定要删除主题「${theme.name}」及其全部版本吗？此操作不可撤销。`)) return;
+	if (!window.confirm(t('dashboard.confirmDelete', { name: theme.name }))) return;
 	busy.value = theme.slug;
 	errorMsg.value = '';
 	try {
 		await api.deleteTheme(theme.slug);
 		await loadThemes();
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '删除失败';
+		errorMsg.value = error instanceof Error ? error.message : t('dashboard.deleteFailed');
 	} finally {
 		busy.value = '';
 	}

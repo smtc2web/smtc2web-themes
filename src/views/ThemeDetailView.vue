@@ -1,11 +1,11 @@
 <template>
-	<div v-if="loading" class="loading">加载中…</div>
+	<div v-if="loading" class="loading">{{ t('common.loading') }}</div>
 	<div v-else-if="errorMsg" class="empty">
 		<p>{{ errorMsg }}</p>
-		<RouterLink class="btn" to="/">返回目录</RouterLink>
+		<RouterLink class="btn" to="/">{{ t('detail.backToCatalog') }}</RouterLink>
 	</div>
 	<template v-else-if="data">
-		<RouterLink to="/" class="back">← 返回目录</RouterLink>
+		<RouterLink to="/" class="back">← {{ t('detail.backToCatalog') }}</RouterLink>
 
 		<header class="detail-header">
 			<div>
@@ -16,8 +16,8 @@
 						{{ data.theme.author.login }}
 					</span>
 					<span>v{{ data.theme.version }}</span>
-					<span>{{ data.theme.downloads }} 次下载</span>
-					<span>更新于 {{ formatDate(data.theme.updated_at) }}</span>
+					<span>{{ t('common.downloadCount', { count: data.theme.downloads }) }}</span>
+					<span>{{ t('detail.updated', { date: formatDate(data.theme.updated_at) }) }}</span>
 				</div>
 				<div v-if="data.theme.tags.length" class="tags">
 					<RouterLink v-for="tag in data.theme.tags" :key="tag" class="tag" :to="`/?tag=${encodeURIComponent(tag)}`">
@@ -26,38 +26,38 @@
 				</div>
 			</div>
 			<div class="actions">
-				<a class="btn btn-lg" :href="data.theme.download_url">下载 ZIP</a>
-				<a v-if="gitUrl" class="btn btn-ghost" :href="gitUrl" target="_blank" rel="noopener">查看源码</a>
+				<a class="btn btn-lg" :href="data.theme.download_url">{{ t('detail.downloadZip') }}</a>
+				<a v-if="gitUrl" class="btn btn-ghost" :href="gitUrl" target="_blank" rel="noopener">{{ t('detail.viewSource') }}</a>
 			</div>
 		</header>
 
 		<div class="preview">
 			<img v-if="!broken" :src="data.theme.screenshot_url" :alt="data.theme.name" @error="broken = true" />
-			<div v-else class="no-preview">该主题没有提供预览图</div>
+			<div v-else class="no-preview">{{ t('detail.noScreenshot') }}</div>
 		</div>
 
 		<div class="columns">
 			<section class="panel">
-				<h2>关于这个主题</h2>
-				<p class="description">{{ data.theme.description || '作者还没有填写描述。' }}</p>
+				<h2>{{ t('detail.about') }}</h2>
+				<p class="description">{{ data.theme.description || t('detail.noDescription') }}</p>
 
-				<h2>安装方法</h2>
+				<h2>{{ t('detail.installTitle') }}</h2>
 				<ol class="install">
-					<li>点击上方「下载 ZIP」获取主题压缩包。</li>
-					<li>打开 smtc2web，进入「主题」页面，点击「上传主题」并选择下载的 ZIP 文件。</li>
-					<li v-if="gitUrl">也可以在主题页面点击「Git 安装」，填写仓库地址后直接安装。</li>
+					<li>{{ t('detail.installStep1') }}</li>
+					<li>{{ t('detail.installStep2') }}</li>
+					<li v-if="gitUrl">{{ t('detail.installStep3') }}</li>
 				</ol>
 			</section>
 
 			<section class="panel">
-				<h2>版本历史</h2>
+				<h2>{{ t('detail.versionHistory') }}</h2>
 				<table class="versions">
 					<thead>
 						<tr>
-							<th>版本</th>
-							<th>大小</th>
-							<th>下载</th>
-							<th>发布时间</th>
+							<th>{{ t('detail.colVersion') }}</th>
+							<th>{{ t('detail.colSize') }}</th>
+							<th>{{ t('detail.colDownloads') }}</th>
+							<th>{{ t('detail.colPublishedAt') }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -70,9 +70,8 @@
 					</tbody>
 				</table>
 				<p class="hint">
-					通过
-					{{ data.theme.published_via === 'actions' ? 'GitHub Actions 自动发布' : '网页上传' }}
-					<span v-if="data.theme.source_repo"> · 源仓库 {{ data.theme.source_repo }}</span>
+					{{ data.theme.published_via === 'actions' ? t('detail.publishedViaActions') : t('detail.publishedViaWeb') }}
+					<span v-if="data.theme.source_repo"> · {{ t('detail.sourceRepo') }} {{ data.theme.source_repo }}</span>
 				</p>
 			</section>
 		</div>
@@ -82,8 +81,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { api, type ThemeDetail } from '@/api';
 
+const { t } = useI18n();
 const route = useRoute();
 const data = ref<ThemeDetail | null>(null);
 const loading = ref(true);
@@ -106,7 +107,7 @@ onMounted(async () => {
 	try {
 		data.value = await api.getTheme(String(route.params.slug));
 	} catch (error) {
-		errorMsg.value = error instanceof Error ? error.message : '加载失败';
+		errorMsg.value = error instanceof Error ? error.message : t('detail.loadFailed');
 	} finally {
 		loading.value = false;
 	}

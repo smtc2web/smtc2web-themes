@@ -2,20 +2,20 @@
 	<RouterLink class="card" :to="`/themes/${theme.slug}`">
 		<div class="thumb">
 			<img v-if="!broken" :src="theme.screenshot_url" :alt="theme.name" loading="lazy" @error="broken = true" />
-			<div v-else class="no-preview">暂无预览图</div>
+			<div v-else class="no-preview">{{ t('common.noPreview') }}</div>
 		</div>
 		<div class="body">
 			<div class="title-row">
 				<h3>{{ theme.name }}</h3>
 				<span class="version">v{{ theme.version }}</span>
 			</div>
-			<p class="desc">{{ theme.description || '这个主题还没有描述' }}</p>
+			<p class="desc">{{ theme.description || t('common.noDescription') }}</p>
 			<div class="meta">
 				<span class="author">
 					<img v-if="theme.author.avatar_url" :src="theme.author.avatar_url" alt="" />
 					{{ theme.author.login }}
 				</span>
-				<span>{{ theme.downloads }} 次下载</span>
+				<span>{{ t('common.downloadCount', { count: theme.downloads }) }}</span>
 			</div>
 			<div v-if="theme.tags.length" class="tags">
 				<span v-for="tag in theme.tags" :key="tag" class="tag">{{ tag }}</span>
@@ -26,8 +26,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ThemeSummary } from '@/api';
 
+const { t } = useI18n();
 defineProps<{ theme: ThemeSummary }>();
 
 const broken = ref(false);
