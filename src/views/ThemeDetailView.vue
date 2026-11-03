@@ -35,7 +35,12 @@
 			<button class="btn btn-ghost" type="button" :disabled="busy" @click="toggleStatus">
 				{{ data.theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
 			</button>
-			<button class="btn btn-danger" type="button" :disabled="busy" @click="remove">{{ t('dashboard.delete') }}</button>
+			<button v-if="data.theme.status !== 'deleted'" class="btn btn-danger" type="button" :disabled="busy" @click="softDelete">
+				{{ t('dashboard.delete') }}
+			</button>
+			<button v-else class="btn btn-danger" type="button" :disabled="busy" @click="removePermanently">
+				{{ t('dashboard.permanentDelete') }}
+			</button>
 		</div>
 		<p v-if="actionError" class="error-banner">{{ actionError }}</p>
 
@@ -134,7 +139,22 @@ async function toggleStatus(): Promise<void> {
 	}
 }
 
-async function remove(): Promise<void> {
+async function softDelete(): Promise<void> {
+	if (!data.value) return;
+	if (!window.confirm(t('dashboard.confirmSoftDelete', { name: data.value.theme.name }))) return;
+	busy.value = true;
+	actionError.value = '';
+	try {
+		const result = await api.setStatus(data.value.theme.slug, 'deleted');
+		data.value.theme = result.theme;
+	} catch (error) {
+		actionError.value = error instanceof Error ? error.message : t('dashboard.deleteFailed');
+	} finally {
+		busy.value = false;
+	}
+}
+
+async function removePermanently(): Promise<void> {
 	if (!data.value) return;
 	if (!window.confirm(t('dashboard.confirmDelete', { name: data.value.theme.name }))) return;
 	busy.value = true;

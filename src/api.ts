@@ -15,7 +15,7 @@ export interface ThemeSummary {
 	repo_url: string | null;
 	source_repo: string | null;
 	published_via: 'web' | 'actions';
-	status?: 'published' | 'hidden';
+	status?: 'published' | 'hidden' | 'deleted';
 	screenshot_url: string;
 	download_url: string;
 	page_url: string;
@@ -111,7 +111,7 @@ export const api = {
 		if (slug) form.append('slug', slug);
 		return request<PublishResult>('/api/themes', { method: 'POST', body: form });
 	},
-	setStatus(slug: string, status: 'published' | 'hidden'): Promise<{ theme: ThemeSummary }> {
+	setStatus(slug: string, status: 'published' | 'hidden' | 'deleted'): Promise<{ theme: ThemeSummary }> {
 		return request(`/api/themes/${encodeURIComponent(slug)}`, {
 			method: 'PATCH',
 			headers: { 'content-type': 'application/json' },

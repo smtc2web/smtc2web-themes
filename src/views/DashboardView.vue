@@ -24,15 +24,25 @@
 						<span>v{{ theme.version }}</span>
 						<span>{{ t('common.downloadCount', { count: theme.downloads }) }}</span>
 						<span>{{ t('common.versionCount', { count: theme.version_count }) }}</span>
-						<span class="badge" :class="theme.status">{{ theme.status === 'published' ? t('dashboard.published') : t('dashboard.hidden') }}</span>
+						<span class="badge" :class="theme.status">{{ statusLabel(theme.status) }}</span>
 					</div>
 				</div>
 				<div class="row-actions">
-					<RouterLink class="btn btn-ghost" :to="`/submit/${theme.slug}`">{{ t('dashboard.publishNewVersion') }}</RouterLink>
-					<button class="btn btn-ghost" type="button" :disabled="busy === theme.slug" @click="toggleStatus(theme)">
-						{{ theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
-					</button>
-					<button class="btn btn-danger" type="button" :disabled="busy === theme.slug" @click="remove(theme)">{{ t('dashboard.delete') }}</button>
+					<RouterLink v-if="theme.status !== 'deleted'" class="btn btn-ghost" :to="`/submit/${theme.slug}`">{{ t('dashboard.publishNewVersion') }}</RouterLink>
+					<template v-if="theme.status === 'deleted'">
+						<button class="btn btn-ghost" type="button" :disabled="busy === theme.slug" @click="toggleStatus(theme)">
+							{{ t('dashboard.restore') }}
+						</button>
+						<button class="btn btn-danger" type="button" :disabled="busy === theme.slug" @click="removePermanently(theme)">
+							{{ t('dashboard.permanentDelete') }}
+						</button>
+					</template>
+					<template v-else>
+						<button class="btn btn-ghost" type="button" :disabled="busy === theme.slug" @click="toggleStatus(theme)">
+							{{ theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
+						</button>
+						<button class="btn btn-danger" type="button" :disabled="busy === theme.slug" @click="softDelete(theme)">{{ t('dashboard.delete') }}</button>
+					</template>
 				</div>
 			</article>
 		</div>
@@ -66,6 +76,10 @@ async function loadThemes(): Promise<void> {
 	}
 }
 
+function statusLabel(status?: string): string {
+	return status === 'published' ? t('dashboard.published') : status === 'deleted' ? t('dashboard.deleted') : t('dashboard.hidden');
+}
+
 async function toggleStatus(theme: ThemeSummary): Promise<void> {
 	busy.value = theme.slug;
 	errorMsg.value = '';
@@ -79,7 +93,21 @@ async function toggleStatus(theme: ThemeSummary): Promise<void> {
 	}
 }
 
-async function remove(theme: ThemeSummary): Promise<void> {
+async function softDelete(theme: ThemeSummary): Promise<void> {
+	if (!window.confirm(t('dashboard.confirmSoftDelete', { name: theme.name }))) return;
+	busy.value = theme.slug;
+	errorMsg.value = '';
+	try {
+		await api.setStatus(theme.slug, 'deleted');
+		await loadThemes();
+	} catch (error) {
+		errorMsg.value = error instanceof Error ? error.message : t('dashboard.deleteFailed');
+	} finally {
+		busy.value = '';
+	}
+}
+
+async function removePermanently(theme: ThemeSummary): Promise<void> {
 	if (!window.confirm(t('dashboard.confirmDelete', { name: theme.name }))) return;
 	busy.value = theme.slug;
 	errorMsg.value = '';
@@ -165,6 +193,11 @@ onMounted(async () => {
 .badge.hidden {
 	color: var(--warn);
 	border-color: color-mix(in srgb, var(--warn) 40%, transparent);
+}
+
+.badge.deleted {
+	color: var(--danger);
+	border-color: color-mix(in srgb, var(--danger) 40%, transparent);
 }
 
 .row-actions {

@@ -108,9 +108,10 @@ export async function listThemesHandler({ request, env, url }: Ctx): Promise<Res
 
 export async function getThemeHandler({ request, env, params }: Ctx): Promise<Response> {
 	const theme = await getThemeBySlug(env.DB, params.slug!);
-	const user = theme && theme.status !== 'published' ? await optionalUser(request, env) : null;
-	const canManage = Boolean(theme && user && (theme.author_id === user.id || isAdmin(env, user)));
-	if (!theme || (theme.status !== 'published' && !canManage)) throw new HttpError(404, '主题不存在');
+	if (!theme) throw new HttpError(404, '主题不存在');
+	const user = await optionalUser(request, env);
+	const canManage = Boolean(user && (theme.author_id === user.id || isAdmin(env, user)));
+	if (theme.status !== 'published' && !canManage) throw new HttpError(404, '主题不存在');
 	const versions = await listVersions(env.DB, theme.id);
 	return publicJson({
 		theme: serializeTheme(theme, request, canManage),
@@ -234,7 +235,7 @@ export async function patchThemeHandler({ request, env, params }: Ctx): Promise<
 	if (theme.author_id !== user.id && !isAdmin(env, user)) throw new HttpError(403, '无权管理该主题');
 	const body = (await request.json().catch(() => null)) as { status?: unknown } | null;
 	const status = str(body?.status);
-	if (status !== 'published' && status !== 'hidden') throw new HttpError(400, 'status 只能是 published 或 hidden');
+	if (status !== 'published' && status !== 'hidden' && status !== 'deleted') throw new HttpError(400, 'status 只能是 published、hidden 或 deleted');
 	await setThemeStatus(env.DB, theme.id, status);
 	const updated = await getThemeBySlug(env.DB, theme.slug);
 	return json({ theme: serializeTheme(updated!, request, true) });
