@@ -1,12 +1,11 @@
 import { verifyActionsToken } from './actions-auth';
 import { MAX_ZIP_BYTES, screenshotMime } from './archive';
-import { isAdmin, requireUser } from './auth';
+import { isAdmin, requireUser, optionalUser } from './auth';
 import {
 	deleteTheme,
 	getLatestVersion,
 	getThemeBySlug,
 	getVersion,
-	listAllThemes,
 	listOwnerThemes,
 	listPublishedThemeUrls,
 	listTags,
@@ -109,10 +108,12 @@ export async function listThemesHandler({ request, env, url }: Ctx): Promise<Res
 
 export async function getThemeHandler({ request, env, params }: Ctx): Promise<Response> {
 	const theme = await getThemeBySlug(env.DB, params.slug!);
-	if (!theme || theme.status !== 'published') throw new HttpError(404, '主题不存在');
+	const user = theme && theme.status !== 'published' ? await optionalUser(request, env) : null;
+	const canManage = Boolean(theme && user && (theme.author_id === user.id || isAdmin(env, user)));
+	if (!theme || (theme.status !== 'published' && !canManage)) throw new HttpError(404, '主题不存在');
 	const versions = await listVersions(env.DB, theme.id);
 	return publicJson({
-		theme: serializeTheme(theme, request, false),
+		theme: serializeTheme(theme, request, canManage),
 		versions: versions.map((version) => serializeVersion(version, request, theme.slug)),
 	});
 }
@@ -174,10 +175,9 @@ export async function sitemapHandler({ env, url }: Ctx): Promise<Response> {
 	});
 }
 
-export async function myThemesHandler({ request, env, url }: Ctx): Promise<Response> {
+export async function myThemesHandler({ request, env }: Ctx): Promise<Response> {
 	const user = await requireUser(request, env);
-	const all = url.searchParams.get('all') === 'true' && isAdmin(env, user);
-	const themes = all ? await listAllThemes(env.DB) : await listOwnerThemes(env.DB, user.id);
+	const themes = await listOwnerThemes(env.DB, user.id);
 	return json({ themes: themes.map((theme) => serializeTheme(theme, request, true)) });
 }
 

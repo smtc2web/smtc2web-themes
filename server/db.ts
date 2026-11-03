@@ -109,11 +109,6 @@ export async function listOwnerThemes(db: D1Database, authorId: number): Promise
 	return rows.results ?? [];
 }
 
-export async function listAllThemes(db: D1Database): Promise<ThemeListRow[]> {
-	const rows = await db.prepare(`${THEME_SELECT} ORDER BY t.updated_at DESC`).all<ThemeListRow>();
-	return rows.results ?? [];
-}
-
 export function listPublishedThemeUrls(db: D1Database): Promise<Array<{ slug: string; updated_at: string }>> {
 	return db
 		.prepare("SELECT slug, updated_at FROM themes WHERE status = 'published' ORDER BY updated_at DESC")

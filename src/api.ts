@@ -105,9 +105,6 @@ export const api = {
 	myThemes(): Promise<{ themes: ThemeSummary[] }> {
 		return request('/api/me/themes');
 	},
-	allThemes(): Promise<{ themes: ThemeSummary[] }> {
-		return request('/api/me/themes?all=true');
-	},
 	publishTheme(file: File, slug?: string): Promise<PublishResult> {
 		const form = new FormData();
 		form.append('file', file);

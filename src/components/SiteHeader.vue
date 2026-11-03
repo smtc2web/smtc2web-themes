@@ -15,6 +15,7 @@
 				<template v-if="me">
 					<img v-if="me.avatar_url" class="avatar" :src="me.avatar_url" :alt="me.login" />
 					<span class="login">{{ me.login }}</span>
+					<span v-if="me.is_admin" class="admin-badge">{{ t('header.admin') }}</span>
 					<button class="btn btn-ghost" type="button" @click="logout">{{ t('header.logout') }}</button>
 				</template>
 				<button v-else-if="loaded" class="btn" type="button" @click="login">
@@ -112,6 +113,17 @@ onMounted(loadMe);
 .login {
 	font-size: 14px;
 	color: var(--text-muted);
+}
+
+.admin-badge {
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 999px;
+	color: var(--accent);
+	border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+	background: color-mix(in srgb, var(--accent) 12%, transparent);
+	white-space: nowrap;
 }
 
 .icon {

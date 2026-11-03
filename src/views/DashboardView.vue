@@ -10,26 +10,17 @@
 			<RouterLink class="btn" to="/submit">{{ t('dashboard.publishNew') }}</RouterLink>
 		</header>
 
-		<div v-if="me.is_admin" class="scope-tabs">
-			<button type="button" class="chip" :class="{ active: scope === 'mine' }" @click="switchScope('mine')">{{ t('dashboard.scopeMine') }}</button>
-			<button type="button" class="chip" :class="{ active: scope === 'all' }" @click="switchScope('all')">{{ t('dashboard.scopeAll') }}</button>
-		</div>
-
 		<p v-if="errorMsg" class="error-banner">{{ errorMsg }}</p>
 		<div v-if="loading" class="loading">{{ t('common.loading') }}</div>
 		<div v-else-if="!themes.length" class="empty">
-			<p>{{ scope === 'all' ? t('dashboard.emptyAll') : t('dashboard.empty') }}</p>
-			<RouterLink v-if="scope === 'mine'" class="btn" to="/submit">{{ t('dashboard.publishFirst') }}</RouterLink>
+			<p>{{ t('dashboard.empty') }}</p>
+			<RouterLink class="btn" to="/submit">{{ t('dashboard.publishFirst') }}</RouterLink>
 		</div>
 		<div v-else class="theme-list">
 			<article v-for="theme in themes" :key="theme.slug" class="theme-row">
 				<div class="info">
 					<RouterLink :to="`/themes/${theme.slug}`" class="name">{{ theme.name }}</RouterLink>
 					<div class="sub">
-						<span v-if="scope === 'all'" class="author">
-							<img v-if="theme.author.avatar_url" :src="theme.author.avatar_url" alt="" />
-							{{ theme.author.login }}
-						</span>
 						<span>v{{ theme.version }}</span>
 						<span>{{ t('common.downloadCount', { count: theme.downloads }) }}</span>
 						<span>{{ t('common.versionCount', { count: theme.version_count }) }}</span>
@@ -37,7 +28,7 @@
 					</div>
 				</div>
 				<div class="row-actions">
-					<RouterLink v-if="scope === 'mine'" class="btn btn-ghost" :to="`/submit/${theme.slug}`">{{ t('dashboard.publishNewVersion') }}</RouterLink>
+					<RouterLink class="btn btn-ghost" :to="`/submit/${theme.slug}`">{{ t('dashboard.publishNewVersion') }}</RouterLink>
 					<button class="btn btn-ghost" type="button" :disabled="busy === theme.slug" @click="toggleStatus(theme)">
 						{{ theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
 					</button>
@@ -62,23 +53,17 @@ const themes = ref<ThemeSummary[]>([]);
 const loading = ref(false);
 const errorMsg = ref('');
 const busy = ref('');
-const scope = ref<'mine' | 'all'>('mine');
 
 async function loadThemes(): Promise<void> {
 	loading.value = true;
 	errorMsg.value = '';
 	try {
-		themes.value = (scope.value === 'all' ? await api.allThemes() : await api.myThemes()).themes;
+		themes.value = (await api.myThemes()).themes;
 	} catch (error) {
 		errorMsg.value = error instanceof Error ? error.message : t('dashboard.loadFailed');
 	} finally {
 		loading.value = false;
 	}
-}
-
-function switchScope(newScope: 'mine' | 'all') {
-	scope.value = newScope;
-	void loadThemes();
 }
 
 async function toggleStatus(theme: ThemeSummary): Promise<void> {
@@ -127,12 +112,6 @@ onMounted(async () => {
 	font-size: 26px;
 }
 
-.scope-tabs {
-	display: flex;
-	gap: 8px;
-	margin-bottom: 20px;
-}
-
 .theme-list {
 	display: flex;
 	flex-direction: column;
@@ -170,18 +149,6 @@ onMounted(async () => {
 	font-size: 12px;
 	margin-top: 6px;
 	align-items: center;
-}
-
-.author {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-}
-
-.author img {
-	width: 18px;
-	height: 18px;
-	border-radius: 50%;
 }
 
 .badge {

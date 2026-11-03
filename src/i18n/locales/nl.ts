@@ -14,6 +14,7 @@ export default {
 		publishTheme: 'Thema publiceren',
 		loginWithGithub: 'Inloggen met GitHub',
 		logout: 'Uitloggen',
+		admin: 'Beheerder',
 	},
 	footer: {
 		tagline: 'smtc2web Themawinkel',
@@ -42,13 +43,10 @@ export default {
 	},
 	dashboard: {
 		title: 'Mijn thema\'s',
-		scopeMine: 'Mijn thema\'s',
-		scopeAll: 'Alle thema\'s',
 		publishNew: 'Nieuw thema publiceren',
 		loginRequired: 'Log in met GitHub om je thema\'s te beheren.',
 		loginAction: 'Inloggen met GitHub',
 		empty: 'Je hebt nog geen thema\'s gepubliceerd.',
-		emptyAll: 'Nog geen thema\'s.',
 		publishFirst: 'Publiceer je eerste thema',
 		published: 'Gepubliceerd',
 		hidden: 'Verborgen',

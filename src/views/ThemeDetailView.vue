@@ -31,6 +31,14 @@
 			</div>
 		</header>
 
+		<div v-if="canManage" class="admin-actions">
+			<button class="btn btn-ghost" type="button" :disabled="busy" @click="toggleStatus">
+				{{ data.theme.status === 'published' ? t('dashboard.hide') : t('dashboard.restore') }}
+			</button>
+			<button class="btn btn-danger" type="button" :disabled="busy" @click="remove">{{ t('dashboard.delete') }}</button>
+		</div>
+		<p v-if="actionError" class="error-banner">{{ actionError }}</p>
+
 		<div class="preview">
 			<img v-if="!broken" :src="data.theme.screenshot_url" :alt="data.theme.name" @error="broken = true" />
 			<div v-else class="no-preview">{{ t('detail.noScreenshot') }}</div>
@@ -80,16 +88,24 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api, type ThemeDetail } from '@/api';
+import { useAuth } from '@/composables/useAuth';
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
+const { me, loadMe } = useAuth();
+
 const data = ref<ThemeDetail | null>(null);
 const loading = ref(true);
 const errorMsg = ref('');
+const actionError = ref('');
 const broken = ref(false);
+const busy = ref(false);
+
+const canManage = computed(() => me.value?.is_admin === true);
 
 const gitUrl = computed(() => data.value?.theme.source_repo ? `https://github.com/${data.value.theme.source_repo}` : data.value?.theme.repo_url);
 
@@ -103,7 +119,37 @@ function formatSize(bytes: number): string {
 	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+async function toggleStatus(): Promise<void> {
+	if (!data.value) return;
+	busy.value = true;
+	actionError.value = '';
+	try {
+		const status = data.value.theme.status === 'published' ? 'hidden' : 'published';
+		const result = await api.setStatus(data.value.theme.slug, status);
+		data.value.theme = result.theme;
+	} catch (error) {
+		actionError.value = error instanceof Error ? error.message : t('dashboard.operationFailed');
+	} finally {
+		busy.value = false;
+	}
+}
+
+async function remove(): Promise<void> {
+	if (!data.value) return;
+	if (!window.confirm(t('dashboard.confirmDelete', { name: data.value.theme.name }))) return;
+	busy.value = true;
+	actionError.value = '';
+	try {
+		await api.deleteTheme(data.value.theme.slug);
+		await router.push('/');
+	} catch (error) {
+		actionError.value = error instanceof Error ? error.message : t('dashboard.deleteFailed');
+		busy.value = false;
+	}
+}
+
 onMounted(async () => {
+	await loadMe();
 	try {
 		data.value = await api.getTheme(String(route.params.slug));
 	} catch (error) {
@@ -181,6 +227,12 @@ onMounted(async () => {
 .actions {
 	display: flex;
 	gap: 10px;
+}
+
+.admin-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 18px;
 }
 
 .preview {

@@ -65,6 +65,14 @@ export async function requireUser(request: Request, env: Env): Promise<UserRow> 
 	return user;
 }
 
+export async function optionalUser(request: Request, env: Env): Promise<UserRow | null> {
+	const token = readCookie(request, SESSION_COOKIE);
+	if (!token) return null;
+	const userId = await verifySessionToken(env, token);
+	if (userId === null) return null;
+	return getUserById(env.DB, userId);
+}
+
 export function isAdmin(env: Env, user: UserRow): boolean {
 	return env.ADMIN_GITHUB_LOGINS.split(',')
 		.map((login) => login.trim().toLowerCase())

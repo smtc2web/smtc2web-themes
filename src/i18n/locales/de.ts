@@ -14,6 +14,7 @@ export default {
 		publishTheme: 'Theme veröffentlichen',
 		loginWithGithub: 'Mit GitHub anmelden',
 		logout: 'Abmelden',
+		admin: 'Admin',
 	},
 	footer: {
 		tagline: 'smtc2web Theme-Store',
@@ -42,13 +43,10 @@ export default {
 	},
 	dashboard: {
 		title: 'Meine Themes',
-		scopeMine: 'Meine Themes',
-		scopeAll: 'Alle Themes',
 		publishNew: 'Neues Theme veröffentlichen',
 		loginRequired: 'Bitte melde dich mit GitHub an, um deine Themes zu verwalten.',
 		loginAction: 'Mit GitHub anmelden',
 		empty: 'Du hast noch keine Themes veröffentlicht.',
-		emptyAll: 'Noch keine Themes vorhanden.',
 		publishFirst: 'Veröffentliche dein erstes Theme',
 		published: 'Veröffentlicht',
 		hidden: 'Ausgeblendet',
